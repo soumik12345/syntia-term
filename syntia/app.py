@@ -1,9 +1,11 @@
 from os import PathLike
 from typing import Union
 
-from textual.app import App
+from textual.app import App, ComposeResult
 from textual.containers import Horizontal
-from textual.widgets import DirectoryTree, TextArea, Footer
+from textual.widgets import DirectoryTree, Footer, TextArea
+
+from syntia.components import VerticalSplitter
 
 
 class Syntia(App):
@@ -12,19 +14,32 @@ class Syntia(App):
         ("ctrl+q", "quit", "Quit"),
     ]
 
+    CSS = """
+    #tree {
+        width: 30;        /* initial sidebar width in cells */
+        min-width: 16;
+        height: 1fr;
+    }
+    #editor {
+        width: 1fr;       /* fill remaining horizontal space */
+        height: 1fr;
+    }
+    """
+
     def __init__(self, root_directory: PathLike, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.root_directory = root_directory
         self.current_open_file: Union[PathLike, None] = None
 
-    def compose(self):
+    def compose(self) -> ComposeResult:
         yield Horizontal(
-            DirectoryTree(path=self.root_directory),
+            DirectoryTree(path=self.root_directory, id="tree"),
+            VerticalSplitter(),
             TextArea(id="editor"),
         )
         yield Footer()
 
-    def _on_directory_tree_file_selected(self, event: DirectoryTree.FileSelected):
+    def on_directory_tree_file_selected(self, event: DirectoryTree.FileSelected):
         if not event.path.is_file():
             return
         self.current_open_file = event.path
