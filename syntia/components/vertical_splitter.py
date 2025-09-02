@@ -11,6 +11,11 @@ class VerticalSplitter(Widget):
         height: 1fr;
         background: $surface;  /* faint bar color */
     }
+    
+    VerticalSplitter:hover {
+        background: $primary;  /* highlighted color on hover */
+        opacity: 0.7;
+    }
     """
 
     def render(self):
