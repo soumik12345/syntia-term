@@ -38,7 +38,7 @@ class Syntia(App):
         yield Horizontal(
             tree,
             VerticalSplitter(),
-            TextArea(id="editor"),
+            TextArea(id="editor", read_only=True),
         )
         yield Footer()
 
@@ -54,6 +54,8 @@ class Syntia(App):
             text_editor.language = "markdown"
         else:
             text_editor.language = "text"
+        text_editor.read_only = False
+        text_editor.focus()
 
     def action_save_file(self):
         if self.current_open_file is None:
