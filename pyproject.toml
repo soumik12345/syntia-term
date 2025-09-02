@@ -10,6 +10,9 @@ dependencies = [
     "weave>=0.52.5",
 ]
 
+[project.scripts]
+syntia = "syntia.run:run_syntia"
+
 [dependency-groups]
 dev = [
     "uv>=0.4.20",
