@@ -1,0 +1,48 @@
+[project]
+name = "syntia"
+version = "0.0.1"
+description = "A AI assisted coding editor"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "textual-dev>=1.7.0",
+    "textual[syntax]>=6.0.0",
+    "weave>=0.52.5",
+]
+
+[dependency-groups]
+dev = [
+    "uv>=0.4.20",
+    "pytest>=8.3.3",
+    "isort>=5.13.2",
+    "black>=24.10.0",
+    "ruff>=0.6.9",
+]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocstrings>=0.26.1",
+    "mkdocstrings-python>=1.11.1",
+    "mkdocs-material>=9.5.39",
+    "mkdocs-minify-plugin>=0.8.0",
+    "mkdocs-glightbox>=0.4.0",
+    "mkdocs-jupyter>=0.25.0",
+    "jupyter>=1.1.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["syntia"]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["syntia"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+combine-as-imports = true
