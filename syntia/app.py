@@ -32,8 +32,11 @@ class Syntia(App):
         self.current_open_file: Union[PathLike, None] = None
 
     def compose(self) -> ComposeResult:
+        tree = DirectoryTree(path=self.root_directory, id="tree")
+        tree.ICON_NODE = "\u25B6 "
+        tree.ICON_NODE_EXPANDED = "\u25BC "
         yield Horizontal(
-            DirectoryTree(path=self.root_directory, id="tree"),
+            tree,
             VerticalSplitter(),
             TextArea(id="editor"),
         )
