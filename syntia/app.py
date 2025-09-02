@@ -3,7 +3,7 @@ from typing import Union
 
 from textual.app import App
 from textual.containers import Horizontal
-from textual.widgets import DirectoryTree, TextArea
+from textual.widgets import DirectoryTree, TextArea, Footer
 
 
 class Syntia(App):
@@ -22,6 +22,7 @@ class Syntia(App):
             DirectoryTree(path=self.root_directory),
             TextArea(id="editor"),
         )
+        yield Footer()
 
     def _on_directory_tree_file_selected(self, event: DirectoryTree.FileSelected):
         if not event.path.is_file():
