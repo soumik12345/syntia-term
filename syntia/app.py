@@ -35,10 +35,13 @@ class Syntia(App):
         tree = DirectoryTree(path=self.root_directory, id="tree")
         tree.ICON_NODE = "\u25B6 "
         tree.ICON_NODE_EXPANDED = "\u25BC "
+
+        text_editor = TextArea(id="editor", read_only=True)
+        text_editor.display = False
         yield Horizontal(
             tree,
             VerticalSplitter(),
-            TextArea(id="editor", read_only=True),
+            text_editor,
         )
         yield Footer()
 
@@ -47,6 +50,7 @@ class Syntia(App):
             return
         self.current_open_file = event.path
         text_editor: TextArea = self.query_one("#editor", TextArea)
+        text_editor.display = True
         text_editor.text = event.path.read_text()
         if event.path.suffix == ".py":
             text_editor.language = "python"
@@ -62,3 +66,4 @@ class Syntia(App):
             return
         editor: TextArea = self.query_one("#editor", TextArea)
         self.current_open_file.write_text(editor.text)
+        self.notify("File saved!", timeout=3)
