@@ -1,11 +1,10 @@
 [project]
 name = "syntia"
 version = "0.0.1"
-description = "A AI assisted coding editor"
+description = "An AI assisted coding editor"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "textual-dev>=1.7.0",
     "textual[syntax]>=6.0.0",
     "weave>=0.52.5",
 ]
@@ -20,6 +19,7 @@ dev = [
     "isort>=5.13.2",
     "black>=24.10.0",
     "ruff>=0.6.9",
+    "textual-dev>=1.7.0",
 ]
 docs = [
     "mkdocs>=1.6.1",

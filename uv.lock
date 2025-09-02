@@ -2571,7 +2571,6 @@ version = "0.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "textual", extra = ["syntax"] },
-    { name = "textual-dev" },
     { name = "weave" },
 ]
 
@@ -2581,6 +2580,7 @@ dev = [
     { name = "isort" },
     { name = "pytest" },
     { name = "ruff" },
+    { name = "textual-dev" },
     { name = "uv" },
 ]
 docs = [
@@ -2597,7 +2597,6 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "textual", extras = ["syntax"], specifier = ">=6.0.0" },
-    { name = "textual-dev", specifier = ">=1.7.0" },
     { name = "weave", specifier = ">=0.52.5" },
 ]
 
@@ -2607,6 +2606,7 @@ dev = [
     { name = "isort", specifier = ">=5.13.2" },
     { name = "pytest", specifier = ">=8.3.3" },
     { name = "ruff", specifier = ">=0.6.9" },
+    { name = "textual-dev", specifier = ">=1.7.0" },
     { name = "uv", specifier = ">=0.4.20" },
 ]
 docs = [
