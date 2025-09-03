@@ -3,14 +3,15 @@ from typing import Union
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal
-from textual.widgets import DirectoryTree, Footer, TextArea
+from textual.widgets import DirectoryTree, Footer
 
-from syntia.components import VerticalSplitter
+from syntia.components import VerticalSplitter, TabbedTextArea
 
 
 class Syntia(App):
     BINDINGS = [
         ("ctrl+s", "save_file", "Save file"),
+        ("ctrl+w", "close_tab", "Close tab"),
         ("ctrl+q", "quit", "Quit"),
     ]
 
@@ -29,41 +30,40 @@ class Syntia(App):
     def __init__(self, root_directory: PathLike, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.root_directory = root_directory
-        self.current_open_file: Union[PathLike, None] = None
 
     def compose(self) -> ComposeResult:
         tree = DirectoryTree(path=self.root_directory, id="tree")
         tree.ICON_NODE = "\u25B6 "
         tree.ICON_NODE_EXPANDED = "\u25BC "
 
-        text_editor = TextArea(id="editor", read_only=True)
-        text_editor.display = False
+        tabbed_editor = TabbedTextArea(id="editor")
         yield Horizontal(
             tree,
             VerticalSplitter(),
-            text_editor,
+            tabbed_editor,
         )
         yield Footer()
 
     def on_directory_tree_file_selected(self, event: DirectoryTree.FileSelected):
         if not event.path.is_file():
             return
-        self.current_open_file = event.path
-        text_editor: TextArea = self.query_one("#editor", TextArea)
-        text_editor.display = True
-        text_editor.text = event.path.read_text()
-        if event.path.suffix == ".py":
-            text_editor.language = "python"
-        elif event.path.suffix == ".md":
-            text_editor.language = "markdown"
-        else:
-            text_editor.language = "text"
-        text_editor.read_only = False
-        text_editor.focus()
+        tabbed_editor: TabbedTextArea = self.query_one("#editor", TabbedTextArea)
+        tabbed_editor.add_file_tab(event.path)
 
     def action_save_file(self):
-        if self.current_open_file is None:
-            return
-        editor: TextArea = self.query_one("#editor", TextArea)
-        self.current_open_file.write_text(editor.text)
-        self.notify("File saved!", timeout=3)
+        tabbed_editor: TabbedTextArea = self.query_one("#editor", TabbedTextArea)
+        if tabbed_editor.save_active_file():
+            file_path = tabbed_editor.get_active_file_path()
+            if file_path:
+                self.notify(f"File {file_path.name} saved!", timeout=3)
+        else:
+            self.notify("No file to save or save failed!", timeout=3)
+    
+    def action_close_tab(self):
+        tabbed_editor: TabbedTextArea = self.query_one("#editor", TabbedTextArea)
+        file_path = tabbed_editor.get_active_file_path()
+        if tabbed_editor.close_tab():
+            if file_path:
+                self.notify(f"Closed {file_path.name}", timeout=2)
+        else:
+            self.notify("No tab to close!", timeout=2)
