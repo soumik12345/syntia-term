@@ -80,9 +80,9 @@ class TabbedTextArea(Widget):
             text_area.language = "html"
         elif file_path.suffix == ".css":
             text_area.language = "css"
-        else:
-            text_area.language = "text"
-        
+        elif file_path.suffix == ".toml":
+            text_area.language = "toml"
+
         # Create tab pane
         tab_pane = TabPane(file_name, text_area, id=tab_id)
         
