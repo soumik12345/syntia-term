@@ -2,10 +2,11 @@ from os import PathLike
 from typing import Union
 
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal
+from textual.containers import Horizontal, Vertical
 from textual.widgets import DirectoryTree, Footer
+from textual_terminal import Terminal
 
-from syntia.components import VerticalSplitter, TabbedTextArea
+from syntia.components import TabbedTextArea, VerticalSplitter
 
 
 class Syntia(App):
@@ -23,7 +24,12 @@ class Syntia(App):
     }
     #editor {
         width: 1fr;       /* fill remaining horizontal space */
-        height: 1fr;
+        height: 1fr;      /* fill most of the vertical space */
+    }
+    #terminal {
+        width: 1fr;
+        height: 15;       /* fixed height for terminal */
+        border: solid $primary;
     }
     """
 
@@ -33,16 +39,25 @@ class Syntia(App):
 
     def compose(self) -> ComposeResult:
         tree = DirectoryTree(path=self.root_directory, id="tree")
-        tree.ICON_NODE = "\u25B6 "
-        tree.ICON_NODE_EXPANDED = "\u25BC "
+        tree.ICON_NODE = "\u25b6 "
+        tree.ICON_NODE_EXPANDED = "\u25bc "
 
         tabbed_editor = TabbedTextArea(id="editor")
+        terminal_widget = Terminal(command="bash", id="terminal")
+
         yield Horizontal(
             tree,
             VerticalSplitter(),
-            tabbed_editor,
+            Vertical(
+                tabbed_editor,
+                terminal_widget,
+            ),
         )
         yield Footer()
+
+    def on_ready(self) -> None:
+        terminal: Terminal = self.query_one("#terminal")
+        terminal.start()
 
     def on_directory_tree_file_selected(self, event: DirectoryTree.FileSelected):
         if not event.path.is_file():
@@ -58,7 +73,7 @@ class Syntia(App):
                 self.notify(f"File {file_path.name} saved!", timeout=3)
         else:
             self.notify("No file to save or save failed!", timeout=3)
-    
+
     def action_close_tab(self):
         tabbed_editor: TabbedTextArea = self.query_one("#editor", TabbedTextArea)
         file_path = tabbed_editor.get_active_file_path()
