@@ -38,7 +38,6 @@ class HorizontalSplitter(Widget):
         below = self._below_widget()
         parent_height = self.parent.size.height
         delta = event.screen_y - self._start_y
-        # Invert the delta so dragging up decreases height and dragging down increases height
         new_height = max(5, min(parent_height - 10, self._start_below_height - delta))
         below.styles.height = new_height
         below.refresh(layout=True)

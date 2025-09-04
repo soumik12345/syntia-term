@@ -37,6 +37,28 @@ class TabbedTextArea(Widget):
         self.tabbed_content = TabbedContent()
         yield self.tabbed_content
 
+    def add_language_support(
+        self, file_path: PathLike, text_area: TextArea
+    ) -> TextArea:
+        if file_path.suffix == ".py":
+            text_area.language = "python"
+        elif file_path.suffix == ".md":
+            text_area.language = "markdown"
+        elif file_path.suffix in [".js", ".jsx"]:
+            text_area.language = "javascript"
+        elif file_path.suffix in [".ts", ".tsx"]:
+            text_area.language = "typescript"
+        elif file_path.suffix == ".json":
+            text_area.language = "json"
+        elif file_path.suffix in [".html", ".htm"]:
+            text_area.language = "html"
+        elif file_path.suffix == ".css":
+            text_area.language = "css"
+        elif file_path.suffix == ".toml":
+            text_area.language = "toml"
+
+        return text_area
+
     def add_file_tab(self, file_path: Union[str, PathLike]) -> str:
         """Add a new tab with a TextArea for the given file."""
         file_path = Path(file_path)
@@ -62,22 +84,7 @@ class TabbedTextArea(Widget):
         text_area = TextArea(text=content, read_only=False, id=f"editor_{tab_id}")
 
         # Set language based on file extension
-        if file_path.suffix == ".py":
-            text_area.language = "python"
-        elif file_path.suffix == ".md":
-            text_area.language = "markdown"
-        elif file_path.suffix in [".js", ".jsx"]:
-            text_area.language = "javascript"
-        elif file_path.suffix in [".ts", ".tsx"]:
-            text_area.language = "typescript"
-        elif file_path.suffix == ".json":
-            text_area.language = "json"
-        elif file_path.suffix in [".html", ".htm"]:
-            text_area.language = "html"
-        elif file_path.suffix == ".css":
-            text_area.language = "css"
-        elif file_path.suffix == ".toml":
-            text_area.language = "toml"
+        text_area = self.add_language_support(file_path, text_area)
 
         # Create tab pane
         tab_pane = TabPane(file_name, text_area, id=tab_id)
@@ -155,7 +162,6 @@ class TabbedTextArea(Widget):
 
     def on_key(self, event: Key) -> None:
         """Handle key events."""
-        # Allow Ctrl+W to close current tab
         if event.key == "ctrl+w":
             self.close_tab()
             event.prevent_default()
