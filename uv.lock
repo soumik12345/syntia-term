@@ -2582,8 +2582,8 @@ name = "syntia"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [
+    { name = "pyte" },
     { name = "textual", extra = ["syntax"] },
-    { name = "textual-terminal" },
     { name = "weave" },
 ]
 
@@ -2609,8 +2609,8 @@ docs = [
 
 [package.metadata]
 requires-dist = [
+    { name = "pyte", specifier = ">=0.8.2" },
     { name = "textual", extras = ["syntax"], specifier = ">=6.0.0" },
-    { name = "textual-terminal", specifier = ">=0.3.0" },
     { name = "weave", specifier = ">=0.52.5" },
 ]
 
@@ -2724,19 +2724,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/27/41/09d5695b050d592ff58422be2ca5c9915787f59ff576ca91d9541d315406/textual_serve-1.1.2.tar.gz", hash = "sha256:0ccaf9b9df9c08d4b2d7a0887cad3272243ba87f68192c364f4bed5b683e4bd4", size = 892959, upload-time = "2025-04-16T12:11:41.746Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7c/fb/0006f86960ab8a2f69c9f496db657992000547f94f53a2f483fd611b4bd2/textual_serve-1.1.2-py3-none-any.whl", hash = "sha256:147d56b165dccf2f387203fe58d43ce98ccad34003fe3d38e6d2bc8903861865", size = 447326, upload-time = "2025-04-16T12:11:43.176Z" },
-]
-
-[[package]]
-name = "textual-terminal"
-version = "0.3.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pyte" },
-    { name = "textual" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/bb/fe/94e6a50d388c9c8ce0da27f71ca5abecd99a15d4347b3d6dccc1dedfe76f/textual_terminal-0.3.0.tar.gz", hash = "sha256:594e7323b74d1e395cf3ce39216cef78cb7c64d01ea71a60ea7b0f9b198e4c87", size = 9482, upload-time = "2023-01-29T14:19:12.464Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ab/3d/c9202997d383a317b14de28e2c7925b56a83edb0a74012ee39b86217850f/textual_terminal-0.3.0-py3-none-any.whl", hash = "sha256:f00b22f5a59ef6d60b61453d7a98354647487c00342d4b0324221db18c4a90f1", size = 12529, upload-time = "2023-01-29T14:19:11.006Z" },
 ]
 
 [[package]]

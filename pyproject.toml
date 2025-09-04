@@ -5,7 +5,7 @@ description = "An AI assisted coding editor"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "textual-terminal>=0.3.0",
+    "pyte>=0.8.2",
     "textual[syntax]>=6.0.0",
     "weave>=0.52.5",
 ]
