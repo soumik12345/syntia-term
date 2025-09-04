@@ -6,7 +6,7 @@ from textual.containers import Horizontal, Vertical
 from textual.widgets import DirectoryTree, Footer
 from textual_terminal import Terminal
 
-from syntia.components import TabbedTextArea, VerticalSplitter
+from syntia.components import HorizontalSplitter, TabbedTextArea, VerticalSplitter
 
 
 class Syntia(App):
@@ -25,13 +25,16 @@ class Syntia(App):
     }
     #editor {
         width: 1fr;       /* fill remaining horizontal space */
-        height: 1fr;      /* fill most of the vertical space */
+        height: 1fr;      /* fill remaining vertical space */
     }
     #terminal {
         width: 1fr;
-        height: 15;       /* fixed height for terminal */
+        height: 15;       /* initial height for terminal */
         border: solid $primary;
         display: none;    /* hidden by default */
+    }
+    HorizontalSplitter {
+        display: none;    /* hidden by default with terminal */
     }
     """
 
@@ -46,6 +49,7 @@ class Syntia(App):
         tree.ICON_NODE_EXPANDED = "\u25bc "
 
         tabbed_editor = TabbedTextArea(id="editor")
+        horizontal_splitter = HorizontalSplitter()
         terminal_widget = Terminal(command="bash", id="terminal")
 
         yield Horizontal(
@@ -53,6 +57,7 @@ class Syntia(App):
             VerticalSplitter(),
             Vertical(
                 tabbed_editor,
+                horizontal_splitter,
                 terminal_widget,
             ),
         )
@@ -88,12 +93,16 @@ class Syntia(App):
 
     def action_toggle_terminal(self):
         terminal: Terminal = self.query_one("#terminal")
+        horizontal_splitter: HorizontalSplitter = self.query_one(HorizontalSplitter)
+
         if terminal.display:
-            # Hide terminal
+            # Hide terminal and splitter
             terminal.display = False
+            horizontal_splitter.display = False
         else:
-            # Show terminal
+            # Show terminal and splitter
             terminal.display = True
+            horizontal_splitter.display = True
             # Initialize and start terminal if not already done
             if not self.terminal_initialized:
                 terminal.start()
