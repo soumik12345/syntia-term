@@ -1,5 +1,4 @@
 from os import PathLike
-from typing import Union
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -96,7 +95,7 @@ class Syntia(App):
             self.notify("No tab to close!", timeout=2)
 
     def action_toggle_terminal(self):
-        terminal: CustomTerminal = self.query_one("#terminal")
+        terminal: SyntiaTerminal = self.query_one("#terminal")
         horizontal_splitter: HorizontalSplitter = self.query_one(HorizontalSplitter)
 
         if terminal.display:
