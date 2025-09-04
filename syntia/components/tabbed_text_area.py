@@ -216,5 +216,5 @@ class TabbedTextArea(Widget):
             if event.text_area.id == f"editor_{tab_id}":
                 # If this is a markdown file with a viewer, update it
                 if tab_id in self.markdown_viewers:
-                    self.markdown_viewers[tab_id].update(event.text_area.text)
+                    self.markdown_viewers[tab_id].markdown = event.text_area.text
                 break
