@@ -2,10 +2,13 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, Optional, Union
 
-from textual.containers import Container
+from textual.containers import Container, Horizontal
 from textual.events import Key
+from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import TabbedContent, TabPane, TextArea
+from textual.widgets import TabbedContent, TabPane, TextArea, MarkdownViewer
+
+from .vertical_splitter import VerticalSplitter
 
 
 class TabbedTextArea(Widget):
@@ -26,12 +29,23 @@ class TabbedTextArea(Widget):
         height: 1fr;
         width: 1fr;
     }
+    
+    TabbedTextArea Horizontal {
+        height: 1fr;
+        width: 1fr;
+    }
+    
+    TabbedTextArea MarkdownViewer {
+        height: 1fr;
+        width: 1fr;
+    }
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.open_files: Dict[str, Path] = {}  # tab_id -> file_path mapping
         self.tabbed_content: Optional[TabbedContent] = None
+        self.markdown_viewers: Dict[str, MarkdownViewer] = {}  # tab_id -> MarkdownViewer mapping
 
     def compose(self):
         self.tabbed_content = TabbedContent()
@@ -86,8 +100,28 @@ class TabbedTextArea(Widget):
         # Set language based on file extension
         text_area = self.add_language_support(file_path, text_area)
 
-        # Create tab pane
-        tab_pane = TabPane(file_name, text_area, id=tab_id)
+        # Create tab pane with appropriate content
+        if file_path.suffix == ".md":
+            # For markdown files, create a split view
+            markdown_viewer = MarkdownViewer(markdown=content, id=f"viewer_{tab_id}")
+            self.markdown_viewers[tab_id] = markdown_viewer
+            
+            # Create horizontal container with TextArea, splitter, and MarkdownViewer
+            horizontal_container = Horizontal(
+                text_area,
+                VerticalSplitter(),
+                markdown_viewer,
+                id=f"container_{tab_id}"
+            )
+            
+            # Set initial widths
+            text_area.styles.width = "50%"
+            markdown_viewer.styles.width = "50%"
+            
+            tab_pane = TabPane(file_name, horizontal_container, id=tab_id)
+        else:
+            # For non-markdown files, just use the TextArea
+            tab_pane = TabPane(file_name, text_area, id=tab_id)
 
         # Add to tabbed content
         self.tabbed_content.add_pane(tab_pane)
@@ -153,6 +187,10 @@ class TabbedTextArea(Widget):
 
         # Remove from file mapping
         del self.open_files[tab_id]
+        
+        # Remove markdown viewer if exists
+        if tab_id in self.markdown_viewers:
+            del self.markdown_viewers[tab_id]
 
         return True
 
@@ -170,3 +208,13 @@ class TabbedTextArea(Widget):
             editor = self.get_active_editor()
             if editor:
                 editor.post_message(event)
+    
+    def on_text_area_changed(self, event: TextArea.Changed) -> None:
+        """Handle text area content changes to update markdown viewer."""
+        # Find which tab this text area belongs to
+        for tab_id, file_path in self.open_files.items():
+            if event.text_area.id == f"editor_{tab_id}":
+                # If this is a markdown file with a viewer, update it
+                if tab_id in self.markdown_viewers:
+                    self.markdown_viewers[tab_id].update(event.text_area.text)
+                break
