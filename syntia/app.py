@@ -13,6 +13,7 @@ class Syntia(App):
     BINDINGS = [
         ("ctrl+s", "save_file", "Save file"),
         ("ctrl+w", "close_tab", "Close tab"),
+        ("ctrl+t", "toggle_terminal", "Toggle terminal"),
         ("ctrl+q", "quit", "Quit"),
     ]
 
@@ -30,12 +31,14 @@ class Syntia(App):
         width: 1fr;
         height: 15;       /* fixed height for terminal */
         border: solid $primary;
+        display: none;    /* hidden by default */
     }
     """
 
     def __init__(self, root_directory: PathLike, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.root_directory = root_directory
+        self.terminal_initialized = False
 
     def compose(self) -> ComposeResult:
         tree = DirectoryTree(path=self.root_directory, id="tree")
@@ -56,8 +59,8 @@ class Syntia(App):
         yield Footer()
 
     def on_ready(self) -> None:
-        terminal: Terminal = self.query_one("#terminal")
-        terminal.start()
+        # Terminal is hidden by default and will be started when first shown
+        pass
 
     def on_directory_tree_file_selected(self, event: DirectoryTree.FileSelected):
         if not event.path.is_file():
@@ -82,3 +85,16 @@ class Syntia(App):
                 self.notify(f"Closed {file_path.name}", timeout=2)
         else:
             self.notify("No tab to close!", timeout=2)
+
+    def action_toggle_terminal(self):
+        terminal: Terminal = self.query_one("#terminal")
+        if terminal.display:
+            # Hide terminal
+            terminal.display = False
+        else:
+            # Show terminal
+            terminal.display = True
+            # Initialize and start terminal if not already done
+            if not self.terminal_initialized:
+                terminal.start()
+                self.terminal_initialized = True
