@@ -3,12 +3,12 @@ from os import PathLike
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import DirectoryTree, Footer
-from textual_terminal import Terminal
 
 from syntia.components import (
     HorizontalSplitter,
     TabbedTextArea,
     VerticalSplitter,
+    Terminal,
 )
 
 
