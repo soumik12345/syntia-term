@@ -1,6 +1,6 @@
 # Syntia
 
-A terminal-based code editor with AI assistance.
+A terminal-based code editor written using [Textual](https://textual.textualize.io/).
 
 ## Setup (no pypi yet)
 
