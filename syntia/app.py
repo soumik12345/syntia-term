@@ -16,7 +16,7 @@ class Syntia(App):
     BINDINGS = [
         ("ctrl+s", "save_file", "Save file"),
         ("ctrl+w", "close_tab", "Close tab"),
-        ("ctrl+t", "toggle_terminal", "Toggle terminal"),
+        ("ctrl+t", "toggle_terminal", "Toggle right panel"),
         ("ctrl+q", "quit", "Quit"),
     ]
 
@@ -34,12 +34,18 @@ class Syntia(App):
         width: 1fr;       /* take half of remaining space */
         height: 1fr;
     }
+    
+    /* When right panel is hidden, editor should expand */
+    #editor_container {
+        height: 1fr;
+    }
     """
 
     def __init__(self, root_directory: PathLike, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.root_directory = root_directory
         self.terminal_initialized = False
+        self.right_panel_collapsed = False
 
     def compose(self) -> ComposeResult:
         tree = DirectoryTree(path=self.root_directory, id="tree")
@@ -153,16 +159,41 @@ class Syntia(App):
             self.notify("No tab to close!", timeout=2)
 
     def action_toggle_terminal(self):
+        """Toggle the visibility of the right panel and vertical splitter."""
         tabbed_right_panel: TabbedRightPanel = self.query_one(
             "#right_panel", TabbedRightPanel
         )
+        vertical_splitter_2 = self.query("#editor_container VerticalSplitter").last()
+
+        if self.right_panel_collapsed:
+            # Show the right panel and splitter
+            self._show_right_panel(tabbed_right_panel, vertical_splitter_2)
+        else:
+            # Hide the right panel and splitter
+            self._hide_right_panel(tabbed_right_panel, vertical_splitter_2)
+
+    def _show_right_panel(
+        self, tabbed_right_panel: TabbedRightPanel, vertical_splitter_2
+    ) -> None:
+        """Show the right panel and vertical splitter."""
+        tabbed_right_panel.display = True
+        if vertical_splitter_2:
+            vertical_splitter_2.display = True
+        self.right_panel_collapsed = False
+
+        # Switch to terminal tab and initialize if needed
         terminal = tabbed_right_panel.get_terminal()
-
         if terminal:
-            # Switch to the terminal tab in the right panel
             tabbed_right_panel.switch_to_terminal_tab()
-
-            # Initialize and start terminal if not already done
             if not self.terminal_initialized:
                 terminal.start()
                 self.terminal_initialized = True
+
+    def _hide_right_panel(
+        self, tabbed_right_panel: TabbedRightPanel, vertical_splitter_2
+    ) -> None:
+        """Hide the right panel and vertical splitter."""
+        tabbed_right_panel.display = False
+        if vertical_splitter_2:
+            vertical_splitter_2.display = False
+        self.right_panel_collapsed = True
