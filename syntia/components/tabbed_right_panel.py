@@ -2,11 +2,12 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, Optional, Union
 
+from textual.events import Key, MouseDown
 from textual.widget import Widget
 from textual.widgets import MarkdownViewer, TabbedContent, TabPane
 
 
-class TabbedRightPanel(Widget):
+class TabbedRightPanel(Widget, can_focus=True):
     """A custom widget that manages MarkdownViewer widgets in tabs for markdown files."""
 
     DEFAULT_CSS = """
@@ -130,3 +131,66 @@ class TabbedRightPanel(Widget):
         return any(
             existing_path == file_path for existing_path in self.open_files.values()
         )
+
+    def close_active_tab(self) -> bool:
+        """Close the currently active tab."""
+        if not self.tabbed_content or not self.tabbed_content.active:
+            return False
+
+        tab_id = self.tabbed_content.active
+        if tab_id in self.open_files:
+            self.tabbed_content.remove_pane(tab_id)
+            del self.open_files[tab_id]
+            return True
+        return False
+
+    def close_tab_by_id(self, tab_id: str) -> bool:
+        """Close a specific tab by its ID."""
+        if tab_id in self.open_files:
+            self.tabbed_content.remove_pane(tab_id)
+            del self.open_files[tab_id]
+            return True
+        return False
+
+    def on_key(self, event: Key) -> None:
+        """Handle key events."""
+        if event.key == "ctrl+w":
+            self.close_active_tab()
+            event.prevent_default()
+
+    def on_mouse_down(self, event: MouseDown) -> None:
+        """Handle mouse events, particularly right-clicks on tabs."""
+        if event.button == 3:  # Right mouse button
+            # Check if we're clicking on a tab header
+            if self.tabbed_content:
+                # Get the tab that was clicked
+                clicked_tab_id = self._get_tab_at_position(event.x, event.y)
+                if clicked_tab_id:
+                    self.close_tab_by_id(clicked_tab_id)
+                    event.prevent_default()
+
+    def _get_tab_at_position(self, x: int, y: int) -> Optional[str]:
+        """Get the tab ID at the given position."""
+        if not self.tabbed_content:
+            return None
+
+        # Check if the click is in the tabs area (typically the top part)
+        if y == 0:  # Tab headers are at the very top
+            tab_ids = list(self.open_files.keys())
+            if not tab_ids:
+                return None
+
+            # Calculate approximate tab positions
+            # Tab titles have some padding, so we estimate based on content
+            current_x = 0
+            for tab_id in tab_ids:
+                if tab_id in self.open_files:
+                    file_path = self.open_files[tab_id]
+                    # Tab title includes 📖 prefix + filename
+                    tab_title = f"📖 {file_path.name}"
+                    estimated_width = len(tab_title) + 4  # Add padding
+
+                    if current_x <= x < current_x + estimated_width:
+                        return tab_id
+                    current_x += estimated_width
+        return None
