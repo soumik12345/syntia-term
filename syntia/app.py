@@ -5,7 +5,6 @@ from textual.containers import Horizontal, Vertical
 from textual.widgets import DirectoryTree, Footer
 
 from syntia.components import (
-    HorizontalSplitter,
     TabbedRightPanel,
     TabbedTextArea,
     Terminal,
@@ -35,15 +34,6 @@ class Syntia(App):
         width: 1fr;       /* take half of remaining space */
         height: 1fr;
     }
-    #terminal {
-        width: 1fr;
-        height: 15;       /* initial height for terminal */
-        border: solid $primary;
-        display: none;    /* hidden by default */
-    }
-    HorizontalSplitter {
-        display: none;    /* hidden by default with terminal */
-    }
     """
 
     def __init__(self, root_directory: PathLike, *args, **kwargs):
@@ -57,9 +47,10 @@ class Syntia(App):
         tree.ICON_NODE_EXPANDED = "\u25bc "
 
         tabbed_editor = TabbedTextArea(id="editor")
-        tabbed_right_panel = TabbedRightPanel(id="right_panel")
-        horizontal_splitter = HorizontalSplitter()
         terminal_widget = Terminal(command="bash", id="terminal")
+        tabbed_right_panel = TabbedRightPanel(
+            terminal=terminal_widget, id="right_panel"
+        )
 
         vertical_splitter_1 = VerticalSplitter()
         vertical_splitter_2 = VerticalSplitter()
@@ -67,22 +58,25 @@ class Syntia(App):
         yield Horizontal(
             tree,
             vertical_splitter_1,
-            Vertical(
-                Horizontal(
-                    tabbed_editor,
-                    vertical_splitter_2,
-                    tabbed_right_panel,
-                    id="editor_container",
-                ),
-                horizontal_splitter,
-                terminal_widget,
+            Horizontal(
+                tabbed_editor,
+                vertical_splitter_2,
+                tabbed_right_panel,
+                id="editor_container",
             ),
         )
         yield Footer()
 
     def on_ready(self) -> None:
-        # Terminal is hidden by default and will be started when first shown
-        pass
+        # Initialize terminal since it's now part of the right panel by default
+        tabbed_right_panel: TabbedRightPanel = self.query_one(
+            "#right_panel", TabbedRightPanel
+        )
+        terminal = tabbed_right_panel.get_terminal()
+
+        if terminal and not self.terminal_initialized:
+            terminal.start()
+            self.terminal_initialized = True
 
     def sync_markdown_preview(self, file_path) -> None:
         """Sync markdown file content to the right panel preview."""
@@ -159,17 +153,15 @@ class Syntia(App):
             self.notify("No tab to close!", timeout=2)
 
     def action_toggle_terminal(self):
-        terminal: Terminal = self.query_one("#terminal")
-        horizontal_splitter: HorizontalSplitter = self.query_one(HorizontalSplitter)
+        tabbed_right_panel: TabbedRightPanel = self.query_one(
+            "#right_panel", TabbedRightPanel
+        )
+        terminal = tabbed_right_panel.get_terminal()
 
-        if terminal.display:
-            # Hide terminal and splitter
-            terminal.display = False
-            horizontal_splitter.display = False
-        else:
-            # Show terminal and splitter
-            terminal.display = True
-            horizontal_splitter.display = True
+        if terminal:
+            # Switch to the terminal tab in the right panel
+            tabbed_right_panel.switch_to_terminal_tab()
+
             # Initialize and start terminal if not already done
             if not self.terminal_initialized:
                 terminal.start()

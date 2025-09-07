@@ -6,6 +6,8 @@ from textual.events import Key, MouseDown
 from textual.widget import Widget
 from textual.widgets import MarkdownViewer, TabbedContent, TabPane
 
+from syntia.components.terminal import Terminal
+
 
 class TabbedRightPanel(Widget, can_focus=True):
     """A custom widget that manages MarkdownViewer widgets in tabs for markdown files."""
@@ -25,16 +27,34 @@ class TabbedRightPanel(Widget, can_focus=True):
         height: 1fr;
         width: 1fr;
     }
+    
+    TabbedRightPanel Terminal {
+        height: 1fr;
+        width: 1fr;
+    }
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, terminal: Terminal = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.open_files: Dict[str, Path] = {}  # tab_id -> file_path mapping
         self.tabbed_content: Optional[TabbedContent] = None
+        self.terminal: Optional[Terminal] = terminal
+        self.terminal_tab_id = "terminal_tab"
 
     def compose(self):
         self.tabbed_content = TabbedContent()
         yield self.tabbed_content
+
+    async def on_mount(self) -> None:
+        """Called when the widget is mounted."""
+        # Add terminal as the first tab if provided
+        if self.terminal and self.tabbed_content:
+            terminal_tab = TabPane("🖥️ Terminal", self.terminal, id=self.terminal_tab_id)
+            self.tabbed_content.add_pane(terminal_tab)
+            # Set terminal tab as active by default
+            self.tabbed_content.active = self.terminal_tab_id
+            # Focus the terminal widget
+            self.terminal.focus()
 
     def add_markdown_tab(self, file_path: Union[str, PathLike], content: str) -> str:
         """Add a new tab with a MarkdownViewer for the given markdown file."""
@@ -132,12 +152,41 @@ class TabbedRightPanel(Widget, can_focus=True):
             existing_path == file_path for existing_path in self.open_files.values()
         )
 
+    def get_terminal(self) -> Optional[Terminal]:
+        """Get the terminal widget."""
+        return self.terminal
+
+    def switch_to_terminal_tab(self) -> None:
+        """Switch to the terminal tab."""
+        if self.tabbed_content and self.terminal:
+            self.tabbed_content.active = self.terminal_tab_id
+            # Focus the terminal when switching to it
+            self.terminal.focus()
+
+    def focus(self, scroll_visible: bool = True) -> None:
+        """Override focus to delegate to the active tab content."""
+        if (
+            self.tabbed_content
+            and self.tabbed_content.active == self.terminal_tab_id
+            and self.terminal
+        ):
+            # Focus the terminal if it's the active tab
+            self.terminal.focus(scroll_visible)
+        else:
+            # Otherwise use default focus behavior
+            super().focus(scroll_visible)
+
     def close_active_tab(self) -> bool:
         """Close the currently active tab."""
         if not self.tabbed_content or not self.tabbed_content.active:
             return False
 
         tab_id = self.tabbed_content.active
+
+        # Prevent closing the terminal tab
+        if tab_id == self.terminal_tab_id:
+            return False
+
         if tab_id in self.open_files:
             self.tabbed_content.remove_pane(tab_id)
             del self.open_files[tab_id]
@@ -146,6 +195,10 @@ class TabbedRightPanel(Widget, can_focus=True):
 
     def close_tab_by_id(self, tab_id: str) -> bool:
         """Close a specific tab by its ID."""
+        # Prevent closing the terminal tab
+        if tab_id == self.terminal_tab_id:
+            return False
+
         if tab_id in self.open_files:
             self.tabbed_content.remove_pane(tab_id)
             del self.open_files[tab_id]
@@ -157,17 +210,39 @@ class TabbedRightPanel(Widget, can_focus=True):
         if event.key == "ctrl+w":
             self.close_active_tab()
             event.prevent_default()
+        else:
+            # Pass other events to the active tab content
+            if (
+                self.tabbed_content
+                and self.tabbed_content.active == self.terminal_tab_id
+                and self.terminal
+            ):
+                # Let the terminal handle the key event
+                return
+
+    def on_tabbed_content_tab_activated(
+        self, event: TabbedContent.TabActivated
+    ) -> None:
+        """Handle tab activation events."""
+        # Check if the terminal tab was activated
+        if event.tab.id == self.terminal_tab_id and self.terminal:
+            # Focus the terminal widget when its tab is activated
+            self.terminal.focus()
 
     def on_mouse_down(self, event: MouseDown) -> None:
         """Handle mouse events, particularly right-clicks on tabs."""
         if event.button == 3:  # Right mouse button
-            # Check if we're clicking on a tab header
-            if self.tabbed_content:
+            # Check if we're clicking on a tab header (only in the top area)
+            if self.tabbed_content and event.y == 0:
                 # Get the tab that was clicked
                 clicked_tab_id = self._get_tab_at_position(event.x, event.y)
                 if clicked_tab_id:
                     self.close_tab_by_id(clicked_tab_id)
                     event.prevent_default()
+                    return
+
+        # For other mouse events, let the content handle them (especially terminal)
+        # Don't prevent default for mouse events in the content area
 
     def _get_tab_at_position(self, x: int, y: int) -> Optional[str]:
         """Get the tab ID at the given position."""
@@ -176,13 +251,18 @@ class TabbedRightPanel(Widget, can_focus=True):
 
         # Check if the click is in the tabs area (typically the top part)
         if y == 0:  # Tab headers are at the very top
-            tab_ids = list(self.open_files.keys())
-            if not tab_ids:
-                return None
-
-            # Calculate approximate tab positions
-            # Tab titles have some padding, so we estimate based on content
             current_x = 0
+
+            # First, check if we're clicking on the terminal tab
+            if self.terminal:
+                terminal_title = "🖥️ Terminal"
+                terminal_width = len(terminal_title) + 4
+                if current_x <= x < current_x + terminal_width:
+                    return self.terminal_tab_id
+                current_x += terminal_width
+
+            # Then check markdown preview tabs
+            tab_ids = list(self.open_files.keys())
             for tab_id in tab_ids:
                 if tab_id in self.open_files:
                     file_path = self.open_files[tab_id]
