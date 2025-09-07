@@ -32,6 +32,11 @@ docs = [
     "mkdocs-jupyter>=0.25.0",
     "jupyter>=1.1.1",
 ]
+build = [
+    "twine>=5.1.1",
+    "wheel>=0.40",
+    "build>=0.10"
+]
 
 [build-system]
 requires = ["hatchling"]
