@@ -2,13 +2,13 @@ from os import PathLike
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
-from textual.widgets import DirectoryTree, Footer
+from textual.widgets import DirectoryTree, Footer, Static
 
 from syntia.components import (
     HorizontalSplitter,
     TabbedTextArea,
-    VerticalSplitter,
     Terminal,
+    VerticalSplitter,
 )
 
 
@@ -27,8 +27,12 @@ class Syntia(App):
         height: 1fr;
     }
     #editor {
-        width: 1fr;       /* fill remaining horizontal space */
+        width: 1fr;       /* take half of remaining space */
         height: 1fr;      /* fill remaining vertical space */
+    }
+    #right_panel {
+        width: 1fr;       /* take half of remaining space */
+        height: 1fr;
     }
     #terminal {
         width: 1fr;
@@ -55,11 +59,19 @@ class Syntia(App):
         horizontal_splitter = HorizontalSplitter()
         terminal_widget = Terminal(command="bash", id="terminal")
 
+        vertical_splitter_1 = VerticalSplitter()
+        vertical_splitter_2 = VerticalSplitter()
+
         yield Horizontal(
             tree,
-            VerticalSplitter(),
+            vertical_splitter_1,
             Vertical(
-                tabbed_editor,
+                Horizontal(
+                    tabbed_editor,
+                    vertical_splitter_2,
+                    Static(id="right_panel"),
+                    id="editor_container",
+                ),
                 horizontal_splitter,
                 terminal_widget,
             ),

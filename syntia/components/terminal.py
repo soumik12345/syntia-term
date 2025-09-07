@@ -10,29 +10,25 @@ so we will use a copy of the source code.
 
 from __future__ import annotations
 
-import os
-import fcntl
-import signal
-import shlex
 import asyncio
-from asyncio import Task
+import fcntl
+import os
 import pty
+import re
+import shlex
+import signal
 import struct
 import termios
-import re
+from asyncio import Task
 from pathlib import Path
 
 import pyte
 from pyte.screens import Char
-
-from rich.text import Text
-from rich.style import Style
 from rich.color import ColorParseError
-
+from rich.style import Style
+from rich.text import Text
+from textual import events, log
 from textual.widget import Widget
-from textual import events
-
-from textual import log
 
 
 class TerminalPyteScreen(pyte.Screen):
