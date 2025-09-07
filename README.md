@@ -7,6 +7,8 @@
 
 Syntia brings modern IDE features to your terminal. Built with [Textual](https://textual.textualize.io/), Syntia combines the power of a traditional code editor with the convenience of an integrated terminal environment.
 
+![](./assets/screenshot.png)
+
 ## ✨ Features
 
 ### 🗂️ **Smart File Management**
