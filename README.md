@@ -75,3 +75,4 @@ syntia /path/to/project
 - Built with [Textual](https://textual.textualize.io/) - An amazing Python TUI framework
 - Terminal emulation based on [textual-terminal](https://github.com/mitosch/textual-terminal)
 - Inspired by modern code editors like VS Code and Sublime Text
+- Built by using the [this](https://fronkan.hashnode.dev/writing-a-text-editor-in-7-minutes-using-textual) amazing tutorial by [Fredrik Sjöstrand](https://hashnode.com/@fronkan) as a starting point.
