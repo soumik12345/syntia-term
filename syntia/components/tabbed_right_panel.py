@@ -14,6 +14,13 @@ class TabbedRightPanel(Widget, can_focus=True):
 
     The panel includes a permanent terminal tab that cannot be closed via right-click
     or Ctrl+W keyboard shortcut. Only markdown preview tabs can be closed.
+
+    Key Features:
+    - Intercepts app-level keybindings (Ctrl+S, Ctrl+T, Ctrl+W, Ctrl+Q) even when
+      terminal is focused, ensuring Syntia's global shortcuts always work
+    - Passes other key events to the terminal for normal terminal interaction
+    - Smart Ctrl+W handling: closes editor tabs when terminal is focused,
+      closes preview tabs when preview tabs are focused
     """
 
     DEFAULT_CSS = """
@@ -217,20 +224,45 @@ class TabbedRightPanel(Widget, can_focus=True):
             return True
         return False
 
-    def on_key(self, event: Key) -> None:
+    async def on_key(self, event: Key) -> None:
         """Handle key events."""
-        if event.key == "ctrl+w":
-            self.close_active_tab()
+        # Always handle app-level keybindings first, regardless of which tab is active
+        # Stop event propagation to ensure they're handled here
+        if event.key == "ctrl+s":
+            # Pass save command to app
+            self.app.action_save_file()
             event.prevent_default()
-        else:
-            # Pass other events to the active tab content
+            event.stop()
+            return
+        elif event.key == "ctrl+t":
+            # Pass toggle terminal command to app
+            self.app.action_toggle_terminal()
+            event.prevent_default()
+            event.stop()
+            return
+        elif event.key == "ctrl+q":
+            # Pass quit command to app
+            self.app.action_quit()
+            event.prevent_default()
+            event.stop()
+            return
+        elif event.key == "ctrl+w":
+            # Handle close tab - could be app-level or panel-level
             if (
                 self.tabbed_content
                 and self.tabbed_content.active == self.terminal_tab_id
-                and self.terminal
             ):
-                # Let the terminal handle the key event
-                return
+                # If terminal tab is active, pass to app to close editor tab
+                self.app.action_close_tab()
+            else:
+                # Otherwise close the active panel tab
+                self.close_active_tab()
+            event.prevent_default()
+            event.stop()
+            return
+
+        # For other keys, let the normal tab content handling occur
+        # Don't stop events here to allow terminal to receive them
 
     def on_tabbed_content_tab_activated(
         self, event: TabbedContent.TabActivated

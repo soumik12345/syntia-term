@@ -1,7 +1,7 @@
 from os import PathLike
 
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal
 from textual.widgets import DirectoryTree, Footer
 
 from syntia.components import (
@@ -144,17 +144,10 @@ class Syntia(App):
 
     def action_close_tab(self):
         tabbed_editor: TabbedTextArea = self.query_one("#editor", TabbedTextArea)
-        file_path = tabbed_editor.get_active_file_path()
 
         if tabbed_editor.close_tab():
-            if file_path:
-                self.notify(f"Closed {file_path.name}", timeout=2)
-                # Remove markdown preview tab if it was a markdown file
-                if file_path.suffix.lower() == ".md":
-                    tabbed_right_panel: TabbedRightPanel = self.query_one(
-                        "#right_panel", TabbedRightPanel
-                    )
-                    tabbed_right_panel.remove_markdown_tab(file_path)
+            # TabbedTextArea now handles notifications and markdown synchronization
+            pass
         else:
             self.notify("No tab to close!", timeout=2)
 

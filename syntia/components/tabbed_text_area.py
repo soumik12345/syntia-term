@@ -147,11 +147,33 @@ class TabbedTextArea(Widget, can_focus=True):
         if not tab_id or tab_id not in self.open_files:
             return False
 
+        # Get file path before removing it
+        file_path = self.open_files[tab_id]
+
         # Remove the tab
         self.tabbed_content.remove_pane(tab_id)
 
         # Remove from file mapping
         del self.open_files[tab_id]
+
+        # Notify app about tab closure for markdown synchronization
+        if file_path.suffix.lower() == ".md":
+            try:
+                # Import here to avoid circular imports
+                from syntia.components.tabbed_right_panel import TabbedRightPanel
+
+                tabbed_right_panel: TabbedRightPanel = self.app.query_one(
+                    "#right_panel", TabbedRightPanel
+                )
+                tabbed_right_panel.remove_markdown_tab(file_path)
+                # Notify user about the synchronized closure
+                self.app.notify(f"Closed {file_path.name} and its preview", timeout=2)
+            except Exception:
+                # Handle case where right panel might not be available
+                self.app.notify(f"Closed {file_path.name}", timeout=2)
+        else:
+            # Notify user about non-markdown tab closure
+            self.app.notify(f"Closed {file_path.name}", timeout=2)
 
         return True
 

@@ -166,6 +166,12 @@ class Terminal(Widget, can_focus=True):
             self.app.set_focus(None)
             return
 
+        # Allow app-level keybindings to pass through to parent widgets
+        # These should be handled by the TabbedRightPanel or main app
+        if event.key in ("ctrl+s", "ctrl+t", "ctrl+q", "ctrl+w"):
+            # Don't stop these events, let them bubble up
+            return
+
         event.stop()
         char = self.ctrl_keys.get(event.key) or event.character
         if char:
