@@ -10,7 +10,11 @@ from syntia.components.terminal import Terminal
 
 
 class TabbedRightPanel(Widget, can_focus=True):
-    """A custom widget that manages MarkdownViewer widgets in tabs for markdown files."""
+    """A custom widget that manages MarkdownViewer widgets in tabs for markdown files.
+
+    The panel includes a permanent terminal tab that cannot be closed via right-click
+    or Ctrl+W keyboard shortcut. Only markdown preview tabs can be closed.
+    """
 
     DEFAULT_CSS = """
     TabbedRightPanel {
@@ -163,6 +167,11 @@ class TabbedRightPanel(Widget, can_focus=True):
             # Focus the terminal when switching to it
             self.terminal.focus()
 
+    def can_close_tab(self, tab_id: str) -> bool:
+        """Check if a tab can be closed."""
+        # Terminal tab cannot be closed
+        return tab_id != self.terminal_tab_id
+
     def focus(self, scroll_visible: bool = True) -> None:
         """Override focus to delegate to the active tab content."""
         if (
@@ -185,6 +194,7 @@ class TabbedRightPanel(Widget, can_focus=True):
 
         # Prevent closing the terminal tab
         if tab_id == self.terminal_tab_id:
+            self.notify("Terminal tab cannot be closed", severity="information")
             return False
 
         if tab_id in self.open_files:
@@ -197,6 +207,8 @@ class TabbedRightPanel(Widget, can_focus=True):
         """Close a specific tab by its ID."""
         # Prevent closing the terminal tab
         if tab_id == self.terminal_tab_id:
+            # Note: This should rarely be called directly for terminal tab
+            # since on_mouse_down now handles it explicitly
             return False
 
         if tab_id in self.open_files:
@@ -237,7 +249,15 @@ class TabbedRightPanel(Widget, can_focus=True):
                 # Get the tab that was clicked
                 clicked_tab_id = self._get_tab_at_position(event.x, event.y)
                 if clicked_tab_id:
-                    self.close_tab_by_id(clicked_tab_id)
+                    # Attempt to close the tab
+                    if clicked_tab_id == self.terminal_tab_id:
+                        # Terminal tab cannot be closed - provide feedback
+                        self.notify(
+                            "Terminal tab cannot be closed", severity="information"
+                        )
+                    else:
+                        # Close non-terminal tabs
+                        self.close_tab_by_id(clicked_tab_id)
                     event.prevent_default()
                     return
 
