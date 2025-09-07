@@ -254,9 +254,14 @@ class Terminal(Widget, can_focus=True):
                             # if style changed, stylize it with rich
                             if x > 0:
                                 last_char = line[x - 1]
-                                if not self.char_style_cmp(char, last_char) or x == self._screen.columns - 1:
+                                if (
+                                    not self.char_style_cmp(char, last_char)
+                                    or x == self._screen.columns - 1
+                                ):
                                     last_style = self.char_rich_style(last_char)
-                                    line_text.stylize(last_style, style_change_pos, x + 1)
+                                    line_text.stylize(
+                                        last_style, style_change_pos, x + 1
+                                    )
                                     style_change_pos = x
 
                             if (
@@ -365,7 +370,7 @@ class Terminal(Widget, can_focus=True):
         """Returns the currently used colors of textual depending on dark-mode."""
         # Check if we're in dark mode based on theme name
         is_dark = "dark" in str(self.app.theme).lower()
-        
+
         # Return appropriate colors based on theme
         return {
             "background": "#000000" if is_dark else "#ffffff",

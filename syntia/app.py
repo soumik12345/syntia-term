@@ -2,10 +2,11 @@ from os import PathLike
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
-from textual.widgets import DirectoryTree, Footer, Static
+from textual.widgets import DirectoryTree, Footer
 
 from syntia.components import (
     HorizontalSplitter,
+    TabbedRightPanel,
     TabbedTextArea,
     Terminal,
     VerticalSplitter,
@@ -56,6 +57,7 @@ class Syntia(App):
         tree.ICON_NODE_EXPANDED = "\u25bc "
 
         tabbed_editor = TabbedTextArea(id="editor")
+        tabbed_right_panel = TabbedRightPanel(id="right_panel")
         horizontal_splitter = HorizontalSplitter()
         terminal_widget = Terminal(command="bash", id="terminal")
 
@@ -69,7 +71,7 @@ class Syntia(App):
                 Horizontal(
                     tabbed_editor,
                     vertical_splitter_2,
-                    Static(id="right_panel"),
+                    tabbed_right_panel,
                     id="editor_container",
                 ),
                 horizontal_splitter,
@@ -82,27 +84,77 @@ class Syntia(App):
         # Terminal is hidden by default and will be started when first shown
         pass
 
+    def sync_markdown_preview(self, file_path) -> None:
+        """Sync markdown file content to the right panel preview."""
+        try:
+            content = file_path.read_text()
+            tabbed_right_panel: TabbedRightPanel = self.query_one(
+                "#right_panel", TabbedRightPanel
+            )
+            tabbed_right_panel.add_markdown_tab(file_path, content)
+        except Exception:
+            # Handle file read errors gracefully
+            pass
+
+    def update_markdown_preview_if_active(self, file_path) -> None:
+        """Update markdown preview if the file is currently active in editor."""
+        tabbed_editor: TabbedTextArea = self.query_one("#editor", TabbedTextArea)
+        active_file = tabbed_editor.get_active_file_path()
+
+        if active_file == file_path and file_path.suffix.lower() == ".md":
+            try:
+                content = file_path.read_text()
+                tabbed_right_panel: TabbedRightPanel = self.query_one(
+                    "#right_panel", TabbedRightPanel
+                )
+                tabbed_right_panel.update_markdown_tab(file_path, content)
+            except Exception:
+                pass
+
+    def sync_active_markdown_preview(self) -> None:
+        """Sync the currently active markdown file in the editor to the preview panel."""
+        tabbed_editor: TabbedTextArea = self.query_one("#editor", TabbedTextArea)
+        active_file = tabbed_editor.get_active_file_path()
+
+        if active_file and active_file.suffix.lower() == ".md":
+            self.sync_markdown_preview(active_file)
+
     def on_directory_tree_file_selected(self, event: DirectoryTree.FileSelected):
         if not event.path.is_file():
             return
         tabbed_editor: TabbedTextArea = self.query_one("#editor", TabbedTextArea)
         tabbed_editor.add_file_tab(event.path)
 
+        # If it's a markdown file, also add it to the right panel
+        if event.path.suffix.lower() == ".md":
+            self.sync_markdown_preview(event.path)
+
     def action_save_file(self):
         tabbed_editor: TabbedTextArea = self.query_one("#editor", TabbedTextArea)
+        file_path = tabbed_editor.get_active_file_path()
+
         if tabbed_editor.save_active_file():
-            file_path = tabbed_editor.get_active_file_path()
             if file_path:
                 self.notify(f"File {file_path.name} saved!", timeout=3)
+                # Update markdown preview if it's a markdown file
+                if file_path.suffix.lower() == ".md":
+                    self.update_markdown_preview_if_active(file_path)
         else:
             self.notify("No file to save or save failed!", timeout=3)
 
     def action_close_tab(self):
         tabbed_editor: TabbedTextArea = self.query_one("#editor", TabbedTextArea)
         file_path = tabbed_editor.get_active_file_path()
+
         if tabbed_editor.close_tab():
             if file_path:
                 self.notify(f"Closed {file_path.name}", timeout=2)
+                # Remove markdown preview tab if it was a markdown file
+                if file_path.suffix.lower() == ".md":
+                    tabbed_right_panel: TabbedRightPanel = self.query_one(
+                        "#right_panel", TabbedRightPanel
+                    )
+                    tabbed_right_panel.remove_markdown_tab(file_path)
         else:
             self.notify("No tab to close!", timeout=2)
 
