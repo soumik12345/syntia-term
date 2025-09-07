@@ -1,7 +1,7 @@
 [project]
 name = "syntia"
 version = "0.0.1"
-description = "An AI assisted coding editor"
+description = "A minimal IDE for your terminal"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
