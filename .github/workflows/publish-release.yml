@@ -1,11 +1,10 @@
-name: Publish Syntia Releases to PyPI
+name: Publish Trackers Releases to PyPI
 
 on:
   push:
     tags:
-      - "[0-9]+.[0-9]+[0-9]+.[0-9]+[0-9]"
-      - "[0-9]+.[0-9]+[0-9]+.[0-9]"
-      - "[0-9]+.[0-9]+.[0-9]"
+      - "[0-9]+.[0-9]+[0-9]+.[0-9]+[0-9]+a[0-9]"
+      - "[0-9]+.[0-9]+[0-9]+.[0-9]+[0-9]+b[0-9]"
   workflow_dispatch:
 
 permissions: {} # Explicitly remove all permissions by default
@@ -15,7 +14,7 @@ jobs:
     name: Publish Release Package
     runs-on: ubuntu-latest
     environment:
-      name: release
+      name: test
       url: https://pypi.org/project/syntia/
     timeout-minutes: 10
     permissions:

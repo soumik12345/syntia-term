@@ -1,4 +1,4 @@
-name: Publish Trackers Pre-Releases to PyPI
+name: Publish Syntia Pre-Releases to PyPI
 
 on:
   push:
