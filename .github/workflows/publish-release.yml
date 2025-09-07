@@ -1,4 +1,4 @@
-name: Publish Trackers Releases to PyPI
+name: Publish Syntia Releases to PyPI
 
 on:
   push:
@@ -43,4 +43,5 @@ jobs:
       - name: 🚀 Publish to PyPi
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
         with:
+          repository-url: https://upload.pypi.org/legacy/
           attestations: true
