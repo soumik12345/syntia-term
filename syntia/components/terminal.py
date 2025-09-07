@@ -10,29 +10,25 @@ so we will use a copy of the source code.
 
 from __future__ import annotations
 
-import os
-import fcntl
-import signal
-import shlex
 import asyncio
-from asyncio import Task
+import fcntl
+import os
 import pty
+import re
+import shlex
+import signal
 import struct
 import termios
-import re
+from asyncio import Task
 from pathlib import Path
 
 import pyte
 from pyte.screens import Char
-
-from rich.text import Text
-from rich.style import Style
 from rich.color import ColorParseError
-
+from rich.style import Style
+from rich.text import Text
+from textual import events, log
 from textual.widget import Widget
-from textual import events
-
-from textual import log
 
 
 class TerminalPyteScreen(pyte.Screen):
@@ -170,6 +166,12 @@ class Terminal(Widget, can_focus=True):
             self.app.set_focus(None)
             return
 
+        # Allow app-level keybindings to pass through to parent widgets
+        # These should be handled by the TabbedRightPanel or main app
+        if event.key in ("ctrl+s", "ctrl+t", "ctrl+q", "ctrl+w"):
+            # Don't stop these events, let them bubble up
+            return
+
         event.stop()
         char = self.ctrl_keys.get(event.key) or event.character
         if char:
@@ -258,9 +260,14 @@ class Terminal(Widget, can_focus=True):
                             # if style changed, stylize it with rich
                             if x > 0:
                                 last_char = line[x - 1]
-                                if not self.char_style_cmp(char, last_char) or x == self._screen.columns - 1:
+                                if (
+                                    not self.char_style_cmp(char, last_char)
+                                    or x == self._screen.columns - 1
+                                ):
                                     last_style = self.char_rich_style(last_char)
-                                    line_text.stylize(last_style, style_change_pos, x + 1)
+                                    line_text.stylize(
+                                        last_style, style_change_pos, x + 1
+                                    )
                                     style_change_pos = x
 
                             if (
@@ -369,7 +376,7 @@ class Terminal(Widget, can_focus=True):
         """Returns the currently used colors of textual depending on dark-mode."""
         # Check if we're in dark mode based on theme name
         is_dark = "dark" in str(self.app.theme).lower()
-        
+
         # Return appropriate colors based on theme
         return {
             "background": "#000000" if is_dark else "#ffffff",

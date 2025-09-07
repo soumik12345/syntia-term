@@ -2,12 +2,12 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, Optional, Union
 
-from textual.events import Key
+from textual.events import Key, MouseDown
 from textual.widget import Widget
 from textual.widgets import TabbedContent, TabPane, TextArea
 
 
-class TabbedTextArea(Widget):
+class TabbedTextArea(Widget, can_focus=True):
     """A custom widget that manages multiple TextArea widgets in tabs."""
 
     DEFAULT_CSS = """
@@ -147,11 +147,33 @@ class TabbedTextArea(Widget):
         if not tab_id or tab_id not in self.open_files:
             return False
 
+        # Get file path before removing it
+        file_path = self.open_files[tab_id]
+
         # Remove the tab
         self.tabbed_content.remove_pane(tab_id)
 
         # Remove from file mapping
         del self.open_files[tab_id]
+
+        # Notify app about tab closure for markdown synchronization
+        if file_path.suffix.lower() == ".md":
+            try:
+                # Import here to avoid circular imports
+                from syntia.components.tabbed_right_panel import TabbedRightPanel
+
+                tabbed_right_panel: TabbedRightPanel = self.app.query_one(
+                    "#right_panel", TabbedRightPanel
+                )
+                tabbed_right_panel.remove_markdown_tab(file_path)
+                # Notify user about the synchronized closure
+                self.app.notify(f"Closed {file_path.name} and its preview", timeout=2)
+            except Exception:
+                # Handle case where right panel might not be available
+                self.app.notify(f"Closed {file_path.name}", timeout=2)
+        else:
+            # Notify user about non-markdown tab closure
+            self.app.notify(f"Closed {file_path.name}", timeout=2)
 
         return True
 
@@ -169,3 +191,40 @@ class TabbedTextArea(Widget):
             editor = self.get_active_editor()
             if editor:
                 editor.post_message(event)
+
+    def on_mouse_down(self, event: MouseDown) -> None:
+        """Handle mouse events, particularly right-clicks on tabs."""
+        if event.button == 3:  # Right mouse button
+            # Check if we're clicking on a tab header
+            if self.tabbed_content:
+                # Get the tab that was clicked
+                clicked_tab_id = self._get_tab_at_position(event.x, event.y)
+                if clicked_tab_id:
+                    self.close_tab(clicked_tab_id)
+                    event.prevent_default()
+
+    def _get_tab_at_position(self, x: int, y: int) -> Optional[str]:
+        """Get the tab ID at the given position."""
+        if not self.tabbed_content:
+            return None
+
+        # Check if the click is in the tabs area (typically the top part)
+        if y == 0:  # Tab headers are at the very top
+            tab_ids = list(self.open_files.keys())
+            if not tab_ids:
+                return None
+
+            # Calculate approximate tab positions
+            # Tab titles have some padding, so we estimate based on content
+            current_x = 0
+            for tab_id in tab_ids:
+                if tab_id in self.open_files:
+                    file_path = self.open_files[tab_id]
+                    # Estimate tab width based on filename length + padding
+                    tab_title = file_path.name
+                    estimated_width = len(tab_title) + 4  # Add padding
+
+                    if current_x <= x < current_x + estimated_width:
+                        return tab_id
+                    current_x += estimated_width
+        return None
