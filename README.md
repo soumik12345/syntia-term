@@ -41,6 +41,12 @@ Syntia-Term brings modern IDE features to your terminal. Built with [Textual](ht
 pip install -U syntia-term
 ```
 
+You can also install syntia-term using [Homebrew](https://brew.sh/)
+
+```bash
+brew install syntia-term
+```
+
 Open your project directory using the `syntia-term` command:
 
 ```bash
