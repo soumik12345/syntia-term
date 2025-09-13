@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![Textual](https://img.shields.io/badge/textual-6.0.0+-brightgreen.svg)
-[![PyPI](https://img.shields.io/pypi/v/syntia.svg)](https://pypi.org/project/syntia/)
+[![PyPI](https://img.shields.io/pypi/v/syntia-term.svg)](https://pypi.org/project/syntia/)
 
 Syntia-Term brings modern IDE features to your terminal. Built with [Textual](https://textual.textualize.io/), Syntia-Term combines the power of a traditional code editor with the convenience of an integrated terminal environment.
 
