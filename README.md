@@ -5,7 +5,7 @@
 ![Textual](https://img.shields.io/badge/textual-6.0.0+-brightgreen.svg)
 [![PyPI](https://img.shields.io/pypi/v/syntia.svg)](https://pypi.org/project/syntia/)
 
-Syntia brings modern IDE features to your terminal. Built with [Textual](https://textual.textualize.io/), Syntia combines the power of a traditional code editor with the convenience of an integrated terminal environment.
+Syntia-Term brings modern IDE features to your terminal. Built with [Textual](https://textual.textualize.io/), Syntia-Term combines the power of a traditional code editor with the convenience of an integrated terminal environment.
 
 ![](./assets/screenshot.png)
 
@@ -44,7 +44,7 @@ pip install -U syntia-term
 Open your project directory using the `syntia-term` command:
 
 ```bash
-syntia /path/to/project
+syntia-term /path/to/project
 ```
 
 ### Keyboard Shortcuts
