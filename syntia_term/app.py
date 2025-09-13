@@ -4,7 +4,7 @@ from textual.app import App, ComposeResult
 from textual.containers import Horizontal
 from textual.widgets import DirectoryTree, Footer
 
-from syntia.components import (
+from syntia_term.components import (
     TabbedRightPanel,
     TabbedTextArea,
     Terminal,

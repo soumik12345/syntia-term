@@ -1,9 +1,9 @@
-# Syntia
+# Syntia-Term
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![Textual](https://img.shields.io/badge/textual-6.0.0+-brightgreen.svg)
-![PyPI](https://img.shields.io/pypi/v/syntia.svg)
+[![PyPI](https://img.shields.io/pypi/v/syntia.svg)](https://pypi.org/project/syntia/)
 
 Syntia brings modern IDE features to your terminal. Built with [Textual](https://textual.textualize.io/), Syntia combines the power of a traditional code editor with the convenience of an integrated terminal environment.
 
@@ -38,10 +38,10 @@ Syntia brings modern IDE features to your terminal. Built with [Textual](https:/
 ### Installation
 
 ```bash
-pip install -U syntia
+pip install -U syntia-term
 ```
 
-Open your project directory using the `syntia` command:
+Open your project directory using the `syntia-term` command:
 
 ```bash
 syntia /path/to/project

@@ -6,7 +6,7 @@ from textual.events import Key, MouseDown
 from textual.widget import Widget
 from textual.widgets import MarkdownViewer, TabbedContent, TabPane
 
-from syntia.components.terminal import Terminal
+from syntia_term.components.terminal import Terminal
 
 
 class TabbedRightPanel(Widget, can_focus=True):

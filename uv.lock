@@ -2768,8 +2768,7 @@ wheels = [
 ]
 
 [[package]]
-name = "syntia"
-version = "0.0.1"
+name = "syntia-term"
 source = { editable = "." }
 dependencies = [
     { name = "pyte" },

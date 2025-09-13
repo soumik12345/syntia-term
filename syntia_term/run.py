@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from syntia.app import Syntia
+from syntia_term.app import Syntia
 
 
 def run_syntia():

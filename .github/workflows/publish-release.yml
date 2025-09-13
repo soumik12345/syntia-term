@@ -1,4 +1,4 @@
-name: Publish Syntia Releases to PyPI
+name: Publish Syntia-Term Releases to PyPI
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: release
-      url: https://pypi.org/project/syntia/
+      url: https://pypi.org/project/syntia-term/
     timeout-minutes: 10
     permissions:
       id-token: write # Required for PyPI publishing

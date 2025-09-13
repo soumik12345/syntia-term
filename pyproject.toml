@@ -1,5 +1,5 @@
 [project]
-name = "syntia"
+name = "syntia_term"
 dynamic = ["version"]
 description = "A minimal IDE for your terminal"
 readme = "README.md"
@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-syntia = "syntia.run:run_syntia"
+syntia-term = "syntia_term.run:run_syntia"
 
 [dependency-groups]
 dev = [
@@ -46,7 +46,7 @@ build-backend = "hatchling.build"
 source = "vcs"
 
 [tool.hatch.build.targets.wheel]
-packages = ["syntia"]
+packages = ["syntia_term"]
 
 [tool.ruff]
 target-version = "py312"
@@ -55,6 +55,6 @@ target-version = "py312"
 select = ["I"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["syntia"]
+known-first-party = ["syntia_term"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 combine-as-imports = true
